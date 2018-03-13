@@ -26,6 +26,8 @@ if ! virsh dominfo "$DOMAIN" | grep -q 'State:\s*running'; then
     exit 3
 fi
 
+echo "Backing up domain $DOMAIN."
+
 BACKUP_FOLDER="$BACKUP_FOLDER/$DOMAIN"
 
 SNAPSHOT_NAME="$(date '+%Y%m%d%H%M%S')"
@@ -93,7 +95,7 @@ virsh domblklist "$DOMAIN" --details | sed -n 's/^file *disk *\([^ ]*\) *\(.*\)/
 
     if [[ "$base" != "$backing" ]]; then
         echo "Committing "$backing" down to $base."
-        virsh blockcommit "$DOMAIN" $target --top "$backing" --wait
+        virsh blockcommit "$DOMAIN" $target --top "$backing" --wait | grep -v '^$'
         echo "Deleting "$backing"."
         rm -f "$backing"
         echo "Rebasing $BACKUP_HOST:"$BACKUP_FOLDER/$(basename "$file")" to be based on $BACKUP_HOST:"$BACKUP_FOLDER/$(basename "$backing")""
