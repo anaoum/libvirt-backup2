@@ -60,7 +60,7 @@ DISKSPEC="$(
 virsh domblklist "$DOMAIN" --details | sed -n 's/^file *disk *\([^ ]*\) *\(.*\)/\1:\2/p' | while IFS=: read -r target file; do
     base="$(get_chain_base "$file")"
     if [[ "$base" == *"nobackup"* ]]; then
-        echo -n " --diskspec $target,snapshot=none"
+        echo -n " --diskspec $target,snapshot=no"
     else
         snapshot="${base/.qcow2/.$SNAPSHOT_NAME.qcow2}"
         echo -n " --diskspec $target,snapshot=external,file=$snapshot"
