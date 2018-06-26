@@ -99,7 +99,7 @@ virsh domblklist "$DOMAIN" --details | sed -n 's/^file *disk *\([^ ]*\) *\(.*\)/
         echo "Deleting "$backing"."
         rm -f "$backing"
         echo "Rebasing $BACKUP_HOST:"$BACKUP_FOLDER/$(basename "$file")" to be based on $BACKUP_HOST:"$BACKUP_FOLDER/$(basename "$backing")""
-        ssh $BACKUP_HOST qemu-img rebase -u -b "$BACKUP_FOLDER/$(basename "$backing")" "$BACKUP_FOLDER/$(basename "$file")"
+        ssh -n $BACKUP_HOST qemu-img rebase -u -b "$BACKUP_FOLDER/$(basename "$backing")" "$BACKUP_FOLDER/$(basename "$file")"
     fi
 
     remote_chain="$(ssh -n $BACKUP_HOST qemu-img info -U --backing-chain "$BACKUP_FOLDER/$(basename "$file")" | sed -n 's/^image: //p')"
@@ -108,9 +108,9 @@ virsh domblklist "$DOMAIN" --details | sed -n 's/^file *disk *\([^ ]*\) *\(.*\)/
         oldbase="$(echo -n "$remote_chain" | tail -1)"
         newbase="$(echo -n "$remote_chain" | tail -2 | head -1)"
         echo "Committing $newbase down to $oldbase"
-        ssh $BACKUP_HOST qemu-img commit -d "$newbase"
+        ssh -n $BACKUP_HOST qemu-img commit -d "$newbase"
         echo "Moving "$oldbase" to "$newbase"."
-        ssh $BACKUP_HOST mv "$oldbase" "$newbase"
+        ssh -n $BACKUP_HOST mv "$oldbase" "$newbase"
         remote_chain="$(ssh -n $BACKUP_HOST qemu-img info -U --backing-chain "$BACKUP_FOLDER/$(basename "$file")" | sed -n 's/^image: //p')"
     done
 done
