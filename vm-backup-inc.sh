@@ -36,9 +36,6 @@ echo "The snapshot will be timestamped $SNAPSHOT_NAME."
 echo "Creating $BACKUP_FOLDER on $BACKUP_HOST"
 ssh -n "$BACKUP_HOST" mkdir -p "$BACKUP_FOLDER"
 
-echo "Saving XML to $BACKUP_HOST:$BACKUP_FOLDER/$DOMAIN.xml"
-virsh dumpxml "$DOMAIN" | ssh "$BACKUP_HOST" "cat - > $BACKUP_FOLDER/$DOMAIN.xml"
-
 function get_backing() {
     qemu-img info -U "$1" | sed -n 's/^backing file: //p'
 }
@@ -114,3 +111,6 @@ virsh domblklist "$DOMAIN" --details | sed -n 's/^file *disk *\([^ ]*\) *\(.*\)/
         remote_chain="$(ssh -n $BACKUP_HOST qemu-img info -U --backing-chain "$BACKUP_FOLDER/$(basename "$file")" | sed -n 's/^image: //p')"
     done
 done
+
+echo "Saving XML to $BACKUP_HOST:$BACKUP_FOLDER/$DOMAIN.xml"
+virsh dumpxml "$DOMAIN" | ssh "$BACKUP_HOST" "cat - > $BACKUP_FOLDER/$DOMAIN.xml"
