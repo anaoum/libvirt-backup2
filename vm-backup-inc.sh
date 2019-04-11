@@ -56,7 +56,7 @@ else
 fi
 
 DISKSPEC="$(
-virsh domblklist "$DOMAIN" --details | sed -n 's/^file *disk *\([^ ]*\) *\(.*\)/\1:\2/p' | while IFS=: read -r target file; do
+virsh domblklist "$DOMAIN" --details | sed -n 's/^ *file *disk *\([^ ]*\) *\(.*\)/\1:\2/p' | while IFS=: read -r target file; do
     base="$(get_chain_base "$file")"
     if [[ "$base" == *"nobackup"* ]]; then
         echo -n " --diskspec $target,snapshot=no"
@@ -71,7 +71,7 @@ done
 virsh snapshot-create-as --domain "$DOMAIN" --no-metadata --atomic $QUIESCE --disk-only $DISKSPEC
 /usr/sbin/aa-enforce "/etc/apparmor.d/libvirt/libvirt-$(virsh domuuid "$DOMAIN" | grep -v '^$')"
 
-virsh domblklist "$DOMAIN" --details | sed -n 's/^file *disk *\([^ ]*\) *\(.*\)/\1:\2/p' | while IFS=: read -r target file; do
+virsh domblklist "$DOMAIN" --details | sed -n 's/^ *file *disk *\([^ ]*\) *\(.*\)/\1:\2/p' | while IFS=: read -r target file; do
     base="$(get_chain_base "$file")"
     if [[ "$base" == *"nobackup"* ]]; then
         continue
