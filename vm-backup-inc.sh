@@ -114,3 +114,17 @@ done
 
 echo "Saving XML to $BACKUP_HOST:$BACKUP_FOLDER/$DOMAIN.xml"
 virsh dumpxml "$DOMAIN" | ssh "$BACKUP_HOST" "cat - > $BACKUP_FOLDER/$DOMAIN.xml"
+
+echo "Fixing XML for disk devices."
+function fix_disk_xml() {
+    virsh detach-disk --config "$DOMAIN" "$1" | grep -v '^ *$'
+    virsh detach-disk --print-xml "$DOMAIN" "$1" | virsh attach-device --config "$DOMAIN" /dev/stdin | grep -v '^ *$'
+}
+
+virsh domblklist "$DOMAIN" --details | sed -n 's/^ *file *disk *\([^ ]*\) *\(.*\)/\1:\2/p' | while IFS=: read -r target file; do
+    base="$(get_chain_base "$file")"
+    if [[ "$base" == *"nobackup"* ]]; then
+        continue
+    fi
+    fix_disk_xml "$target"
+done
