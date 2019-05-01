@@ -15,5 +15,4 @@ fi
 virsh list --all --name | while IFS= read -r domain; do
     [ -z "$domain" ] && continue
     $(dirname "$0")/vm-backup-verify.sh "$domain" "$BACKUP_HOST" "$BACKUP_FOLDER" "$NBDDEV" "$VERBOSE"
-    echo
 done
