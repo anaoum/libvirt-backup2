@@ -77,12 +77,12 @@ virsh domblklist "$DOMAIN" --details | sed -n 's/^ *file *disk *\([^ ]*\) *\(.*\
     fi
 
     local_checksum="$(mktemp)"
-    modprobe nbd; qemu-nbd -d $NBDDEV > /dev/null
+    /sbin/modprobe nbd; qemu-nbd -d $NBDDEV > /dev/null
     qemu-nbd -r -c $NBDDEV "$backing"
     dd if=$NBDDEV bs=64K status=$STATUS | md5sum | cut -f 1 -d ' ' > "$local_checksum" &
 
     remote_checksum="$(mktemp)"
-    ssh -n $BACKUP_HOST "modprobe nbd; qemu-nbd -d $NBDDEV > /dev/null"
+    ssh -n $BACKUP_HOST "/sbin/modprobe nbd; qemu-nbd -d $NBDDEV > /dev/null"
     ssh -n $BACKUP_HOST "qemu-nbd -r -c $NBDDEV $BACKUP_FOLDER/$(basename $file)"
     ssh -n $BACKUP_HOST "dd if=$NBDDEV bs=64K status=$STATUS | md5sum | cut -f 1 -d ' '" > "$remote_checksum" &
 
