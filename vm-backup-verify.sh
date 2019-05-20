@@ -56,7 +56,7 @@ virsh domblklist "$DOMAIN" --details | sed -n 's/^ *file *disk *\([^ ]*\) *\(.*\
     fi
     backing="$(get_backing "$file")"
 
-    if [[ "$file" == "$backing" ]]; then
+    if [[ "$file" == "$base" ]]; then
         >&2 echo "No local reference point of last backup. Exiting."
         exit 4
     fi
